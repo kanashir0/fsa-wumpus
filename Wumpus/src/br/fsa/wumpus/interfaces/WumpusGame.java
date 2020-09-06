@@ -1,7 +1,7 @@
-package fsa.br.wumpus.interfaces;
+package br.fsa.wumpus.interfaces;
 
 public interface WumpusGame {
-	public boolean shoot();
+	public String shoot();
 	public void turnL();
 	public void turnR();
 	public void walk();

@@ -2,7 +2,7 @@ package br.fsa.wumpus.kernel;
 
 import java.util.Random;
 
-import fsa.br.wumpus.interfaces.WumpusGame;
+import br.fsa.wumpus.interfaces.WumpusGame;
 
 public class Kernel implements WumpusGame {
 	public static final int EAST  = 0;
@@ -31,8 +31,8 @@ public class Kernel implements WumpusGame {
 		wumpus = true;
 		dir = EAST;
 		cave[3][0] = PLAYER;
-		newGame();
 		random = new Random();
+		newGame();
 	}
 	
 	public void newGame() {
@@ -43,7 +43,8 @@ public class Kernel implements WumpusGame {
 		putGold();
 		putWumpus();
 		putPit();
-		putSensors();
+		putPit();
+		putPit();
 	}
 	
 	private void putGold() {
@@ -56,6 +57,7 @@ public class Kernel implements WumpusGame {
 		} while (!isValidPos(x, y));
 		
 		cave[x][y] |= GOLD;
+		putSensors(x, y, GOLD);
 	}
 	
 	private void putWumpus() {
@@ -68,6 +70,7 @@ public class Kernel implements WumpusGame {
 		} while (!isValidPos(x, y));
 		
 		cave[x][y] |= WUMPUS;
+		putSensors(x, y, WUMPUS);
 	}
 	
 	private void putPit() {
@@ -80,11 +83,25 @@ public class Kernel implements WumpusGame {
 		} while (!isValidPos(x, y));
 		
 		cave[x][y] |= PIT;
+		putSensors(x, y, PIT);
 	}
 	
-	private void putSensors() {
-		// TODO: Implementar método de colocar os sensores
+	private void putSensors(int x, int y, int TYPE) {
+		if (x - 1 >= 0) {
+			cave[x - 1][y] |= TYPE;
+		}
 		
+		if (x + 1 < 4) {
+			cave[x + 1][y] |= TYPE;
+		}
+		
+		if (y - 1 >= 0) {
+			cave[x][y - 1] |= TYPE;
+		}
+		
+		if (y + 1 < 4) {
+			cave[x][y + 1] |= TYPE;
+		}
 	}
 	
 	private boolean isValidPos(int x, int y) {
@@ -95,23 +112,118 @@ public class Kernel implements WumpusGame {
 		}
 	}
 	
-	public boolean shoot() {
+	public String shoot() {
+		if (!arrow) {
+			return "0";
+		}
 		if (arrow) {
 			arrow = false;
-			if(testShoot()) {
-				return true;
+			if (testShoot()) {
+				return "3";
 			}
 		}
-		return false;
+		return "1";
 	}
 	
 	private boolean testShoot() {
-		// TODO: Implementar método de atirar
-		// Percorrer caminho na direção que o player está olhando e se tiver o Wumpus, ele matará.
-		return true;
+		int[] pos = getPlayerPos();
+		
+		if (dir == NORTH) {
+			if (pos[0] - 1 >= 0) {
+				if ((cave[pos[0] - 1][pos[1]] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+			
+			if (pos[0] - 2 >= 0) {
+				if ((cave[pos[0] - 2][pos[1]] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+			
+			if (pos[0] - 3 >= 0) {
+				if ((cave[pos[0] - 3][pos[1]] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+		}
+		
+		if (dir == SOUTH) {
+			if (pos[0] + 1 < 4) {
+				if ((cave[pos[0] + 1][pos[1]] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+			
+			if (pos[0] + 2 < 4) {
+				if ((cave[pos[0] + 2][pos[1]] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+			
+			if (pos[0] + 3 < 4) {
+				if ((cave[pos[0] + 3][pos[1]] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+		}
+		
+		if (dir == EAST) {
+			if (pos[1] + 1 < 4) {
+				if ((cave[pos[0]][pos[1] + 1] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+			
+			if (pos[1] + 2 < 4) {
+				if ((cave[pos[0]][pos[1] + 2] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+			
+			if (pos[1] + 3 < 4) {
+				if ((cave[pos[0]][pos[1] + 3] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+		}
+		
+		if (dir == WEST) {
+			if (pos[1] - 1 >= 0) {
+				if ((cave[pos[0]][pos[1] - 1] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+			
+			if (pos[1] - 2 >= 0) {
+				if ((cave[pos[0]][pos[1] - 2] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+			
+			if (pos[1] - 3 >= 0) {
+				if ((cave[pos[0]][pos[1] - 3] & WUMPUS) == WUMPUS) {
+					wumpus = false;
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	
-	private int[] getPlayerPos() {
+	public int[] getPlayerPos() {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
 				if((cave[i][j] & PLAYER) == PLAYER) {
@@ -137,10 +249,62 @@ public class Kernel implements WumpusGame {
 	
 	public void walk() {
 		// TODO: Implementar método de andar
+		int[] pos = getPlayerPos();
+		
+		if (dir == NORTH && pos[0] - 1 >= 0) {
+			cave[pos[0]][pos[1]]--;
+			cave[pos[0] - 1][pos[1]]++;
+		}
+
+		if (dir == SOUTH && pos[0] + 1 < 4) {
+			cave[pos[0]][pos[1]]--;
+			cave[pos[0] + 1][pos[1]]++;
+		}
+		
+		if (dir == EAST && pos[1] + 1 < 4) {
+			cave[pos[0]][pos[1]]--;
+			cave[pos[0]][pos[1] + 1]++;
+		}
+		
+		if (dir == WEST && pos[1] - 1 >= 0) {
+			cave[pos[0]][pos[1]]--;
+			cave[pos[0]][pos[1] - 1]++;
+		}
 	}
 	
 	public int[][] getCave() {
 		return cave;
+	}
+	
+	public boolean getArrow() {
+		return arrow;
+	}
+	
+	public boolean getWumpus() {
+		return wumpus;
+	}
+	
+	public int getDirection() {
+		return dir;
+	}
+	
+	public boolean hasDied() {
+		int[] pos = getPlayerPos();
+		if (((cave[pos[0]][pos[1]] & WUMPUS) == WUMPUS) ||
+			((cave[pos[0]][pos[1]] & PIT) 	== PIT)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean hasGold() {
+		int[] pos = getPlayerPos();
+		if ((cave[pos[0]][pos[1]] & GOLD) == GOLD) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 }
